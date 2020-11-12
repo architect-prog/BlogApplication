@@ -11,7 +11,9 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">BlogApplication</a>
+                <a class="navbar-brand mr-0 mr-md-2" href="/">
+                    <img src="~/images/Смэрть.jpg" asp-append-version="true" width="30" height="30">
+                </a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -26,6 +28,21 @@
                         </li>
                     </ul>
                 </div>
+                @if (User.Identity.IsAuthenticated)
+                {                    
+                    <div class="navbar-nav ml-md-auto">
+                        <form asp-controller="Account" asp-action="SignOut" method="post">
+                            <input class="btn btn-secondary mx-1" type="submit" value="Sign Out" />
+                        </form>                        
+                    </div>
+                }
+                else
+                {
+                    <div class="navbar-nav ml-md-auto">
+                        <a class="btn btn-outline-primary mx-1 " asp-controller="Account" asp-action="SignUp">Sign Up</a>
+                        <a class="btn btn-outline-primary mx-1" asp-controller="Account" asp-action="SignIn">Sign In</a>
+                    </div>
+                }
             </div>
         </nav>
     </header>
