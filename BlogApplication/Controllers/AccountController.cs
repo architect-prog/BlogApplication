@@ -78,7 +78,7 @@ namespace BlogApplication.Controllers
                 }
                 else
                 {
-                    ModelState.AddModelError("", "Incorrect login or password!");
+                    ModelState.AddModelError(string.Empty, "Incorrect login or password!");
                 }
             }          
 

@@ -29,7 +29,12 @@ namespace BlogApplication
         {
             services.AddDbContext<UserContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
-            services.AddIdentity<User, IdentityRole>().AddEntityFrameworkStores<UserContext>();
+            services.AddIdentity<User, IdentityRole>(options => 
+                {
+                    options.Password.RequireNonAlphanumeric = false;
+                    options.Password.RequireUppercase = false;
+                    options.User.RequireUniqueEmail = true;
+                }).AddEntityFrameworkStores<UserContext>();
 
             services.AddControllersWithViews();
         }

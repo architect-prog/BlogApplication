@@ -1,0 +1,17 @@
+﻿@model IEnumerable<User>
+@{
+    ViewData["Title"] = "UserList";
+}
+
+<table class="table">
+    @foreach (var user in Model)
+    {
+        <tr>
+            <td>@user.Email</td>
+            <td>@user.UserName</td>
+            <td>
+                <a class="btn btn-sm btn-primary" asp-controller="Roles" asp-action="Edit" asp-route-userid="@user.Id">Access permission</a>
+            </td>
+        </tr>
+    }
+</table>
