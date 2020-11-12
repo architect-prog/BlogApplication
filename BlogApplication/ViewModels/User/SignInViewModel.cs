@@ -4,8 +4,8 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace BlogApplication.ViewModels
-{
+namespace BlogApplication.ViewModels.User
+{ 
     public class SignInViewModel
     {
         [Required]
@@ -17,7 +17,5 @@ namespace BlogApplication.ViewModels
 
         [Display(Name = "Remember me")]
         public bool RememberMe { get; set; }
-        public string ReturnUrl { get; set; }
-
     }
 }

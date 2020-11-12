@@ -4,8 +4,8 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace BlogApplication.ViewModels
-{
+namespace BlogApplication.ViewModels.User
+{ 
     public class EditUserViewModel
     {
         public string Id { get; set; }

@@ -1,0 +1,26 @@
+﻿@model UserDetailsViewModel
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1 class="h1">User information</h1>
+<p class="text-dark">
+    Your email:<br>
+    <span class="text-primary">@Model.Email</span>   
+</p>
+
+<p class="text-dark">
+    Your username:<br>
+    <span class="text-primary">@Model.UserName</span>
+</p>
+
+<p class="text-dark">
+    Your roles:<br>
+    @foreach (string role in Model.UserRoles)
+    {
+        <span class="text-primary">@role</span>
+
+    }
+</p>
+
+

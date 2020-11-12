@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using BlogApplication.Models;
-using BlogApplication.ViewModels;
+using BlogApplication.ViewModels.User;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -34,18 +33,8 @@ namespace BlogApplication.Controllers
                     UserName = model.Username 
                 };
 
-                var result = await _userManager.CreateAsync(user, model.Password);
-                if (result.Succeeded)
-                {
-                    return RedirectToAction("Index");
-                }
-                else
-                {
-                    foreach (var error in result.Errors)
-                    {
-                        ModelState.AddModelError(string.Empty, error.Description);
-                    }
-                }
+                IdentityResult result = await _userManager.CreateAsync(user, model.Password);
+                return ProcessIdentityResult(result, () => RedirectToAction(nameof(Index)), () => View(model));
             }
             return View(model);
         }
@@ -80,20 +69,11 @@ namespace BlogApplication.Controllers
                     user.Email = model.Email;
                     user.UserName = model.Username;
 
-                    var result = await _userManager.UpdateAsync(user);
-                    if (result.Succeeded)
-                    {
-                        return RedirectToAction("Index");
-                    }
-                    else
-                    {
-                        foreach (var error in result.Errors)
-                        {
-                            ModelState.AddModelError(string.Empty, error.Description);
-                        }
-                    }
+                    IdentityResult result = await _userManager.UpdateAsync(user);
+                    return ProcessIdentityResult(result, () => RedirectToAction(nameof(Index)), () => View(model));                  
                 }
             }
+
             return View(model);
         }
 
@@ -105,7 +85,8 @@ namespace BlogApplication.Controllers
             {
                 IdentityResult result = await _userManager.DeleteAsync(user);
             }
-            return RedirectToAction("Index");
+
+            return RedirectToAction(nameof(Index));
         }
 
         public async Task<IActionResult> ChangePassword(string id)
@@ -125,27 +106,35 @@ namespace BlogApplication.Controllers
             if (ModelState.IsValid)
             {
                 User user = await _userManager.FindByIdAsync(model.Id);
+
                 if (user != null)
                 {
                     IdentityResult result = await _userManager.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
-                    if (result.Succeeded)
-                    {
-                        return RedirectToAction("Index");
-                    }
-                    else
-                    {
-                        foreach (var error in result.Errors)
-                        {
-                            ModelState.AddModelError(string.Empty, error.Description);
-                        }
-                    }
+                    ProcessIdentityResult(result, () => RedirectToAction(nameof(Index)), () => View(model));
                 }
                 else
-                {
+                {                    
                     ModelState.AddModelError(string.Empty, "Пользователь не найден");
                 }
             }
             return View(model);
+        }
+
+        private IActionResult ProcessIdentityResult(IdentityResult result, Func<IActionResult> successAction, Func<IActionResult> failure)
+        {
+            if (result.Succeeded)
+            {
+                return successAction.Invoke();
+            }
+            else
+            {
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+            }
+
+            return failure.Invoke();
         }
     }
 }

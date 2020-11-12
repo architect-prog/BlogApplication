@@ -4,8 +4,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using BlogApplication.Models;
 using BlogApplication.ViewModels;
+using BlogApplication.ViewModels.User;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization.Internal;
 
 namespace BlogApplication.Controllers
 {
@@ -20,9 +22,21 @@ namespace BlogApplication.Controllers
             _signInManager = signInManager;
         }
 
-        public IActionResult SignUp()
+        public IActionResult SignUp() => View();
+
+        public async Task<IActionResult> Details()
         {
-            return View();
+            User user = await _userManager.GetUserAsync(User);
+            IList<string> userRoles = await _userManager.GetRolesAsync(user);        
+
+            UserDetailsViewModel userDetails = new UserDetailsViewModel()
+            {
+                Email = user.Email,
+                UserName = user.UserName,
+                UserRoles = userRoles
+            };
+          
+            return View(userDetails);
         }
 
         [HttpPost]
@@ -30,17 +44,17 @@ namespace BlogApplication.Controllers
         {
             if (ModelState.IsValid)
             {
-                User user = new User()
+                User user = new User() 
                 {
                     UserName = model.Username,
-                    Email = model.Email                    
+                    Email = model.Email                   
                 };
 
                 IdentityResult result = await _userManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
                     await _signInManager.SignInAsync(user, false);
-                    return RedirectToAction("Index", "Home");
+                    return RedirectToHome();
                 }
                 else
                 {
@@ -53,10 +67,7 @@ namespace BlogApplication.Controllers
             return View(model);
         }
 
-        public IActionResult SignIn(string returnUrl = null)
-        {
-            return View(new SignInViewModel { ReturnUrl = returnUrl });
-        }
+        public IActionResult SignIn() => View();
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -65,16 +76,10 @@ namespace BlogApplication.Controllers
             if (ModelState.IsValid)
             {
                 var result = await _signInManager.PasswordSignInAsync(model.Username, model.Password, model.RememberMe, false);
+
                 if (result.Succeeded)
                 {
-                    if (!string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
-                    {
-                        return Redirect(model.ReturnUrl);
-                    }
-                    else
-                    {
-                        return RedirectToAction("Index", "Home");
-                    }
+                    return RedirectToHome();
                 }
                 else
                 {
@@ -90,6 +95,11 @@ namespace BlogApplication.Controllers
         public async Task<IActionResult> SignOut()
         {
             await _signInManager.SignOutAsync();
+            return RedirectToHome();
+        }
+
+        private IActionResult RedirectToHome()
+        {
             return RedirectToAction("Index", "Home");
         }
     }

@@ -22,6 +22,8 @@ namespace BlogApplication.Controllers
         }
 
         public IActionResult Index() => View(_roleManager.Roles.ToList());
+        public IActionResult UserList() => View(_userManager.Users.ToList());
+
         public IActionResult Create() => View();
 
         [HttpPost]
@@ -30,17 +32,7 @@ namespace BlogApplication.Controllers
             if (!string.IsNullOrEmpty(name))
             {
                 IdentityResult result = await _roleManager.CreateAsync(new IdentityRole(name));
-                if (result.Succeeded)
-                {
-                    return RedirectToAction(nameof(Index));
-                }
-                else
-                {
-                    foreach (var error in result.Errors)
-                    {
-                        ModelState.AddModelError(string.Empty, error.Description);
-                    }
-                }
+                ProcessIdentityResult(result, () => RedirectToAction(nameof(Index)), () => View(name));               
             }
             return View(name);
         }
@@ -51,52 +43,71 @@ namespace BlogApplication.Controllers
             IdentityRole role = await _roleManager.FindByIdAsync(id);
             if (role != null)
             {
-                IdentityResult result = await _roleManager.DeleteAsync(role);
+                await _roleManager.DeleteAsync(role);
             }
+
             return RedirectToAction(nameof(Index));
         }
 
-        public IActionResult UserList() => View(_userManager.Users.ToList());
 
         public async Task<IActionResult> Edit(string userId)
         {
             User user = await _userManager.FindByIdAsync(userId);
-            if (user != null)
+            if (user == null)
             {
-                var userRoles = await _userManager.GetRolesAsync(user);
-                var allRoles = _roleManager.Roles.ToList();
-                ChangeRoleViewModel model = new ChangeRoleViewModel
-                {
-                    UserId = user.Id,
-                    UserEmail = user.Email,
-                    UserRoles = userRoles,
-                    AllRoles = allRoles
-                };
-                return View(model);
+                return NotFound();
             }
 
-            return NotFound();
+            var userRoles = await _userManager.GetRolesAsync(user);
+            var allRoles = _roleManager.Roles.ToList();
+
+            ChangeRoleViewModel model = new ChangeRoleViewModel
+            {
+                UserId = user.Id,
+                UserEmail = user.Email,
+                UserRoles = userRoles,
+                AllRoles = allRoles
+            };
+
+            return View(model);
         }
         [HttpPost]
         public async Task<IActionResult> Edit(string userId, List<string> roles)
         {
             User user = await _userManager.FindByIdAsync(userId);
-            if (user != null)
+            if (user == null)
             {
-                var userRoles = await _userManager.GetRolesAsync(user);
-
-                var allRoles = _roleManager.Roles.ToList();
-                var addedRoles = roles.Except(userRoles);
-                var removedRoles = userRoles.Except(roles);
-
-                await _userManager.AddToRolesAsync(user, addedRoles);
-
-                await _userManager.RemoveFromRolesAsync(user, removedRoles);
-
-                return RedirectToAction(nameof(UserList));
+                return NotFound();
             }
 
-            return NotFound();
+            var userRoles = await _userManager.GetRolesAsync(user);
+
+            var allRoles = _roleManager.Roles.ToList();
+            var addedRoles = roles.Except(userRoles);
+            var removedRoles = userRoles.Except(roles);
+
+            await _userManager.AddToRolesAsync(user, addedRoles);
+
+            await _userManager.RemoveFromRolesAsync(user, removedRoles);
+
+            return RedirectToAction(nameof(UserList));
+        }
+
+        private IActionResult ProcessIdentityResult(IdentityResult result, Func<IActionResult> successAction, Func<IActionResult> failure)
+        {
+            if (result.Succeeded)
+            {
+                return successAction.Invoke();
+            }
+            else
+            {
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+            }
+
+            return failure.Invoke();
         }
     }
 }
