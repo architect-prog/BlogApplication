@@ -1,0 +1,30 @@
+﻿@model BlogApplication.ViewModels.Post.CreatePostViewModel
+@{
+    ViewData["Title"] = "Create";
+}
+
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Title"></label>
+                <input class="form-control" asp-for="Title"/>
+                <span class="text-danger" asp-validation-for="Title"></span>
+            </div>
+            <div class="form-group">
+                <label class="control-label" asp-for="Content"></label>
+                <input class="form-control"  asp-for="Content"/>
+                <span class="text-danger" asp-validation-for="Content"></span>
+            </div>
+            <div class="form-group">
+                <input class="btn btn-primary" type="submit" value="Create"/>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+

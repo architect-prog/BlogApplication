@@ -22,7 +22,7 @@ namespace BlogApplication.Controllers
             _signInManager = signInManager;
         }
 
-        public IActionResult SignUp() => View();
+      
 
         public async Task<IActionResult> Details()
         {
@@ -38,6 +38,8 @@ namespace BlogApplication.Controllers
           
             return View(userDetails);
         }
+
+        public IActionResult SignUp() => View();
 
         [HttpPost]
         public async Task<IActionResult> SignUp(SignUpViewModel model)

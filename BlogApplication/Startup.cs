@@ -28,6 +28,7 @@ namespace BlogApplication
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<UserContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            services.AddDbContext<PostContext>(options => options.UseSqlServer(Configuration.GetConnectionString("PostDefaultConnection")));
 
             services.AddIdentity<User, IdentityRole>(options => 
                 {
@@ -35,6 +36,8 @@ namespace BlogApplication
                     options.Password.RequireUppercase = false;
                     options.User.RequireUniqueEmail = true;
                 }).AddEntityFrameworkStores<UserContext>();
+
+
 
             services.AddControllersWithViews();
         }
