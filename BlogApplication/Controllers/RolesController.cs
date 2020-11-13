@@ -83,8 +83,8 @@ namespace BlogApplication.Controllers
             var userRoles = await _userManager.GetRolesAsync(user);
 
             var allRoles = _roleManager.Roles.ToList();
-            var addedRoles = roles.Except(userRoles);
-            var removedRoles = userRoles.Except(roles);
+            var addedRoles = roles.Except(userRoles).ToList();
+            var removedRoles = userRoles.Except(roles).ToList();
 
             await _userManager.AddToRolesAsync(user, addedRoles);
 
