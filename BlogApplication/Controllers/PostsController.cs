@@ -11,8 +11,8 @@ namespace BlogApplication.Controllers
 {
     public class PostsController : Controller
     {
-        private readonly PostContext _posts;
-        public PostsController(PostContext posts)
+        private readonly UserContext _posts;
+        public PostsController(UserContext posts)
         {
             _posts = posts;
         }
@@ -27,6 +27,7 @@ namespace BlogApplication.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(CreatePostViewModel model)
         {
+
             Post post = new Post()
             {
                 Title = model.Title,
@@ -92,9 +93,16 @@ namespace BlogApplication.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        public IActionResult Details(int postId)
+        public async Task<IActionResult> Details(int postId)
         {
-            return View();
+            Post post = await _posts.Posts.FindAsync(postId);
+            PostDetailsViewModel model = new PostDetailsViewModel()
+            {
+                Title = post.Title,
+                Content = post.Content,
+                PublishedDate = post.PublishedDate
+            };
+            return View(model);
         }
     }
 }

@@ -28,7 +28,7 @@ namespace BlogApplication
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<UserContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-            services.AddDbContext<PostContext>(options => options.UseSqlServer(Configuration.GetConnectionString("PostDefaultConnection")));
+            //services.AddDbContext<PostContext>(options => options.UseSqlServer(Configuration.GetConnectionString("PostDefaultConnection")));
 
             services.AddIdentity<User, IdentityRole>(options => 
                 {

@@ -10,10 +10,11 @@ namespace BlogApplication.Repository
 {
     public class UserContext: IdentityDbContext<User>
     {
+        public DbSet<Post> Posts { get; set; }
         public UserContext(DbContextOptions<UserContext> options)
             : base(options)
         {
-            Database.EnsureCreated();
+            //Database.EnsureCreated();
         }
     }
 }

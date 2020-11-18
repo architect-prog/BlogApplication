@@ -4,7 +4,10 @@
 }
 
 <p>
-    <a asp-controller="Posts" asp-action="Create">Create New</a>
+    @if (User.Identity.IsAuthenticated)
+    {
+        <a class="btn btn-primary" asp-controller="Posts" asp-action="Create">Create New</a>
+    }
 </p>
 <table class="table">
     <thead>
@@ -20,10 +23,12 @@
         <tr>
             <td>@item.Title</td>
             <td>@item.PublishedDate</td>
+            <td>@item.PublishedDate</td>
+            <td>@item.UserId</td>
             <td>
-                <a asp-controller="Posts" asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-controller="Posts" asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-controller="Posts" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                <a asp-controller="Posts" asp-action="Edit" asp-route-postId="@item.Id">Edit</a> |
+                <a asp-controller="Posts" asp-action="Details" asp-route-postId="@item.Id">Details</a> |
+                <a asp-controller="Posts" asp-action="Delete" asp-route-postId="@item.Id">Delete</a>
             </td>
         </tr>
     }
