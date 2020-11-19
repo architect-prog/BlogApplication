@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using BlogApplication.Models;
 using BlogApplication.ViewModels;
 using BlogApplication.ViewModels.User;
@@ -15,30 +16,31 @@ namespace BlogApplication.Controllers
     {
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
+        private readonly IMapper _userMapper;
 
-        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager)
+        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, IMapper userMapper)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _userMapper = userMapper;
         }
 
       
 
         public async Task<IActionResult> Details()
         {           
-            User user = 
-                
-                await _userManager.GetUserAsync(User);
-            IList<string> userRoles = await _userManager.GetRolesAsync(user);        
-                       
-            
+            User user = await _userManager.GetUserAsync(User);
+            IList<string> userRoles = await _userManager.GetRolesAsync(user);
+
+            //UserDetailsViewModel userDetails = _userMapper.Map<UserDetailsViewModel>(user);
+
             UserDetailsViewModel userDetails = new UserDetailsViewModel()
             {
                 Email = user.Email,
                 UserName = user.UserName,
                 UserRoles = userRoles
             };
-          
+
             return View(userDetails);
         }
 

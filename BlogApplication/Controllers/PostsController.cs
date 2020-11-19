@@ -5,20 +5,32 @@ using System.Threading.Tasks;
 using BlogApplication.Models;
 using BlogApplication.Repository;
 using BlogApplication.ViewModels.Post;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BlogApplication.Controllers
 {
     public class PostsController : Controller
     {
-        private readonly UserContext _posts;
-        public PostsController(UserContext posts)
+        private readonly PostRepository _posts;
+        private readonly UserManager<User> _userManager;
+        public PostsController(PostRepository posts, UserManager<User> userManager)
         {
             _posts = posts;
+            _userManager = userManager;
         }
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            IEnumerable<Post> posts = _posts.Posts.ToList();
+            User user = await _userManager.GetUserAsync(User);
+            if (user != null)
+            {
+                IList<string> roles = await _userManager.GetRolesAsync(user);
+                ViewBag.IsAdmin = roles.Contains("Admin");
+                ViewBag.UserId = user.Id;
+            }
+        
+            IEnumerable<Post> posts = _posts.GetAll();
+
             return View(posts);
         }
 
@@ -27,22 +39,23 @@ namespace BlogApplication.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(CreatePostViewModel model)
         {
+            User user = await _userManager.GetUserAsync(User);
+
             Post post = new Post()
             {
                 Title = model.Title,
                 Content = model.Content,
-                PublishedDate = DateTime.UtcNow                
+                UserId = user.Id,
+                PublishedDate = DateTime.UtcNow
             };
 
-            await _posts.Posts.AddAsync(post);
-            await _posts.SaveChangesAsync();
-
+            await _posts.Add(post);           
             return View();
         }
 
         public async Task<IActionResult> Edit(int postId)
         {
-            Post post = await _posts.Posts.FindAsync(postId);
+            Post post = await _posts.GetById(postId);
             
             if (post == null)
             {
@@ -64,15 +77,13 @@ namespace BlogApplication.Controllers
         {
             if (ModelState.IsValid)
             {
-                Post post = await _posts.Posts.FindAsync(model.Id);
+                Post post = await _posts.GetById(model.Id);
                 if (post != null)
                 {
                     post.Title = model.Title;
                     post.Content = model.Content;
-                    _posts.Posts.Update(post);
 
-                    await _posts.SaveChangesAsync();
-
+                    await _posts.Update(post);
                     return RedirectToAction(nameof(Index));
                 }
             }
@@ -82,19 +93,15 @@ namespace BlogApplication.Controllers
         [HttpPost]
         public async Task<IActionResult> Delete(int postId)
         {
-            Post post = await _posts.Posts.FindAsync(postId);
-            if (post != null)
-            {
-                _posts.Posts.Remove(post);
-                await _posts.SaveChangesAsync();
-            }
+            await _posts.Delete(postId);            
 
             return RedirectToAction(nameof(Index));
         }
 
         public async Task<IActionResult> Details(int postId)
         {
-            Post post = await _posts.Posts.FindAsync(postId);
+            Post post = await _posts.GetById(postId);
+
             PostDetailsViewModel model = new PostDetailsViewModel()
             {
                 Title = post.Title,

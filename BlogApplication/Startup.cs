@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using BlogApplication.Models;
 using BlogApplication.Repository;
 using BlogApplication.Services;
@@ -27,8 +28,8 @@ namespace BlogApplication
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
-        {
-            services.AddDbContext<UserContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+        {            
+            services.AddDbContext<ApplicationContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             //services.AddDbContext<PostContext>(options => options.UseSqlServer(Configuration.GetConnectionString("PostDefaultConnection")));
 
             services.AddIdentity<User, IdentityRole>(options => 
@@ -36,8 +37,11 @@ namespace BlogApplication
                     options.Password.RequireNonAlphanumeric = false;
                     options.Password.RequireUppercase = false;
                     options.User.RequireUniqueEmail = true;
-                }).AddEntityFrameworkStores<UserContext>();
+                }).AddEntityFrameworkStores<ApplicationContext>();
 
+            services.AddAutoMapper(typeof(Startup));
+
+            services.AddScoped<PostRepository>();
 
             services.AddTransient<UserService>();
             services.AddTransient<IdentityResultHandler>();

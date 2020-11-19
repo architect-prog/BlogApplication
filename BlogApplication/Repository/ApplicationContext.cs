@@ -8,10 +8,10 @@ using System.Threading.Tasks;
 
 namespace BlogApplication.Repository
 {
-    public class UserContext: IdentityDbContext<User>
+    public class ApplicationContext: IdentityDbContext<User>
     {
         public DbSet<Post> Posts { get; set; }
-        public UserContext(DbContextOptions<UserContext> options)
+        public ApplicationContext(DbContextOptions<ApplicationContext> options)
             : base(options)
         {
 
