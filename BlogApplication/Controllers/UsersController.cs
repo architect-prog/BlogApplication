@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using BlogApplication.Models;
+using BlogApplication.Services;
 using BlogApplication.ViewModels.User;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -13,10 +14,12 @@ namespace BlogApplication.Controllers
     public class UsersController : Controller
     {
         private readonly UserManager<User> _userManager;
+        private readonly IdentityResultHandler _identityHandler;
 
-        public UsersController(UserManager<User> userManager)
+        public UsersController(UserManager<User> userManager, IdentityResultHandler identityHandler)
         {
             _userManager = userManager;
+            _identityHandler = identityHandler;
         }
 
         public IActionResult Index() => View(_userManager.Users.ToList());
@@ -34,7 +37,12 @@ namespace BlogApplication.Controllers
                 };
 
                 IdentityResult result = await _userManager.CreateAsync(user, model.Password);
-                return ProcessIdentityResult(result, () => RedirectToAction(nameof(Index)), () => View(model));
+                return _identityHandler
+                    .SetIdentityResult(result)
+                    .SetSuccessAction(() => RedirectToAction(nameof(Index)))
+                    .SetFailureAction(() => View(model))
+                    .AddModelErrors(ModelState)
+                    .HandleIdentityResult();
             }
             return View(model);
         }
@@ -70,7 +78,12 @@ namespace BlogApplication.Controllers
                     user.UserName = model.Username;
 
                     IdentityResult result = await _userManager.UpdateAsync(user);
-                    return ProcessIdentityResult(result, () => RedirectToAction(nameof(Index)), () => View(model));                  
+                    return _identityHandler
+                        .SetIdentityResult(result)
+                        .SetSuccessAction(() => RedirectToAction(nameof(Index)))
+                        .SetFailureAction(() => View(model))
+                        .AddModelErrors(ModelState)
+                        .HandleIdentityResult();        
                 }
             }
 
@@ -108,9 +121,14 @@ namespace BlogApplication.Controllers
                 User user = await _userManager.FindByIdAsync(model.Id);
 
                 if (user != null)
-                {
+                {                    
                     IdentityResult result = await _userManager.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
-                    ProcessIdentityResult(result, () => RedirectToAction(nameof(Index)), () => View(model));
+                    return _identityHandler
+                        .SetIdentityResult(result)
+                        .SetSuccessAction(() => RedirectToAction(nameof(Index)))
+                        .SetFailureAction(() => View(model))
+                        .AddModelErrors(ModelState)
+                        .HandleIdentityResult();
                 }
                 else
                 {                    
@@ -118,23 +136,6 @@ namespace BlogApplication.Controllers
                 }
             }
             return View(model);
-        }
-
-        private IActionResult ProcessIdentityResult(IdentityResult result, Func<IActionResult> successAction, Func<IActionResult> failure)
-        {
-            if (result.Succeeded)
-            {
-                return successAction.Invoke();
-            }
-            else
-            {
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError(string.Empty, error.Description);
-                }
-            }
-
-            return failure.Invoke();
         }
     }
 }

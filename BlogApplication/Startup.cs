@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using BlogApplication.Models;
 using BlogApplication.Repository;
+using BlogApplication.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -38,6 +39,8 @@ namespace BlogApplication
                 }).AddEntityFrameworkStores<UserContext>();
 
 
+            services.AddTransient<UserService>();
+            services.AddTransient<IdentityResultHandler>();
 
             services.AddControllersWithViews();
         }

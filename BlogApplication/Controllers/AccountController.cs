@@ -26,10 +26,12 @@ namespace BlogApplication.Controllers
 
         public async Task<IActionResult> Details()
         {           
-            User user = await _userManager.GetUserAsync(User);
+            User user = 
+                
+                await _userManager.GetUserAsync(User);
             IList<string> userRoles = await _userManager.GetRolesAsync(user);        
                        
-
+            
             UserDetailsViewModel userDetails = new UserDetailsViewModel()
             {
                 Email = user.Email,

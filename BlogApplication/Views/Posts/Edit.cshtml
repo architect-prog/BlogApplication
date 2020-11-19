@@ -1,12 +1,9 @@
 ﻿@model BlogApplication.ViewModels.Post.EditPostViewModel
-
 @{
     ViewData["Title"] = "Edit";
 }
 
-<h1>Edit</h1>
-
-<h4>EditPostViewModel</h4>
+<h1 class="h1">Edit post</h1>
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -22,7 +19,7 @@
             </div>
             <div class="form-group">
                 <label asp-for="Content" class="control-label"></label>
-                <input asp-for="Content" class="form-control" />
+                <textarea class="form-control" asp-for="Content"></textarea>
                 <span asp-validation-for="Content" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -33,6 +30,6 @@
 </div>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a class="text-primary" asp-controller="Posts" asp-action="Index">Back</a>
 </div>
 

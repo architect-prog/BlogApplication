@@ -27,7 +27,6 @@ namespace BlogApplication.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(CreatePostViewModel model)
         {
-
             Post post = new Post()
             {
                 Title = model.Title,
@@ -44,7 +43,7 @@ namespace BlogApplication.Controllers
         public async Task<IActionResult> Edit(int postId)
         {
             Post post = await _posts.Posts.FindAsync(postId);
-
+            
             if (post == null)
             {
                 return NotFound();

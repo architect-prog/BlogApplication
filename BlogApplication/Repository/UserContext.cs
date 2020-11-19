@@ -14,7 +14,7 @@ namespace BlogApplication.Repository
         public UserContext(DbContextOptions<UserContext> options)
             : base(options)
         {
-            //Database.EnsureCreated();
+
         }
     }
 }

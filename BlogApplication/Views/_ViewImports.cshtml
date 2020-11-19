@@ -1,7 +1,9 @@
 ﻿@using BlogApplication
 @using BlogApplication.Models
+@using BlogApplication.Services
 @using BlogApplication.ViewModels.User
 @using BlogApplication.ViewModels.Roles
 @using BlogApplication.ViewModels.Post
 @using Microsoft.AspNetCore.Identity
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@inject UserService UserService;

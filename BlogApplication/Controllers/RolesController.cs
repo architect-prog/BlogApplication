@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using BlogApplication.Models;
+using BlogApplication.Services;
 using BlogApplication.ViewModels.Roles;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -15,6 +16,8 @@ namespace BlogApplication.Controllers
     {
         RoleManager<IdentityRole> _roleManager;
         UserManager<User> _userManager;
+        private readonly IdentityResultHandler _identityHandler;
+
         public RolesController(RoleManager<IdentityRole> roleManager, UserManager<User> userManager)
         {
             _roleManager = roleManager;
@@ -32,7 +35,12 @@ namespace BlogApplication.Controllers
             if (!string.IsNullOrEmpty(name))
             {
                 IdentityResult result = await _roleManager.CreateAsync(new IdentityRole(name));
-                ProcessIdentityResult(result, () => RedirectToAction(nameof(Index)), () => View(name));               
+                return _identityHandler
+                    .SetIdentityResult(result)
+                    .SetSuccessAction(() => RedirectToAction(nameof(Index)))
+                    .SetFailureAction(() => View((object)name))
+                    .AddModelErrors(ModelState)
+                    .HandleIdentityResult();          
             }
             return View(name);
         }
@@ -91,23 +99,6 @@ namespace BlogApplication.Controllers
             await _userManager.RemoveFromRolesAsync(user, removedRoles);
 
             return RedirectToAction(nameof(UserList));
-        }
-
-        private IActionResult ProcessIdentityResult(IdentityResult result, Func<IActionResult> successAction, Func<IActionResult> failure)
-        {
-            if (result.Succeeded)
-            {
-                return successAction.Invoke();
-            }
-            else
-            {
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError(string.Empty, error.Description);
-                }
-            }
-
-            return failure.Invoke();
-        }
+        }     
     }
 }
