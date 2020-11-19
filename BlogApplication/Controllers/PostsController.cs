@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using BlogApplication.Models;
 using BlogApplication.Repository;
 using BlogApplication.ViewModels.Post;
@@ -14,11 +15,16 @@ namespace BlogApplication.Controllers
     {
         private readonly PostRepository _posts;
         private readonly UserManager<User> _userManager;
-        public PostsController(PostRepository posts, UserManager<User> userManager)
+
+        private readonly IMapper _mapper;
+
+        public PostsController(PostRepository posts, UserManager<User> userManager, IMapper mapper)
         {
             _posts = posts;
             _userManager = userManager;
+            _mapper = mapper;
         }
+
         public async Task<IActionResult> Index()
         {
             User user = await _userManager.GetUserAsync(User);
@@ -41,15 +47,12 @@ namespace BlogApplication.Controllers
         {
             User user = await _userManager.GetUserAsync(User);
 
-            Post post = new Post()
-            {
-                Title = model.Title,
-                Content = model.Content,
-                UserId = user.Id,
-                PublishedDate = DateTime.UtcNow
-            };
+            Post post = _mapper.Map<Post>(model);
+            post.UserId = user.Id;
+            post.PublishedDate = DateTime.UtcNow;          
 
-            await _posts.Add(post);           
+            await _posts.Add(post);        
+            
             return View();
         }
 
@@ -62,13 +65,7 @@ namespace BlogApplication.Controllers
                 return NotFound();
             }
 
-            EditPostViewModel model = new EditPostViewModel()
-            {
-                Id = post.Id,
-                Title = post.Title,
-                Content = post.Content                
-            };
-
+            EditPostViewModel model = _mapper.Map<EditPostViewModel>(post);             
             return View(model);
         }
 
@@ -77,15 +74,12 @@ namespace BlogApplication.Controllers
         {
             if (ModelState.IsValid)
             {
-                Post post = await _posts.GetById(model.Id);
-                if (post != null)
-                {
-                    post.Title = model.Title;
-                    post.Content = model.Content;
+                Post post = await _posts.GetById(model.Id);                
+                post.Title = model.Title;
+                post.Content = model.Content;
 
-                    await _posts.Update(post);
-                    return RedirectToAction(nameof(Index));
-                }
+                await _posts.Update(post);
+                return RedirectToAction(nameof(Index));                
             }
             return View(model);
         }
@@ -102,12 +96,8 @@ namespace BlogApplication.Controllers
         {
             Post post = await _posts.GetById(postId);
 
-            PostDetailsViewModel model = new PostDetailsViewModel()
-            {
-                Title = post.Title,
-                Content = post.Content,
-                PublishedDate = post.PublishedDate
-            };
+            PostDetailsViewModel model = _mapper.Map<PostDetailsViewModel>(post); 
+
             return View(model);
         }
     }
