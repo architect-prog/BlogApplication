@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using BlogApplication.Models;
 using BlogApplication.Services;
 using BlogApplication.ViewModels.User;
@@ -15,11 +16,13 @@ namespace BlogApplication.Controllers
     {
         private readonly UserManager<User> _userManager;
         private readonly IdentityResultHandler _identityHandler;
+        private readonly IMapper _mapper;
 
-        public UsersController(UserManager<User> userManager, IdentityResultHandler identityHandler)
+        public UsersController(UserManager<User> userManager, IdentityResultHandler identityHandler, IMapper mapper)
         {
             _userManager = userManager;
             _identityHandler = identityHandler;
+            _mapper = mapper;
         }
 
         public IActionResult Index() => View(_userManager.Users.ToList());
@@ -30,12 +33,8 @@ namespace BlogApplication.Controllers
         {
             if (ModelState.IsValid)
             {
-                User user = new User() 
-                { 
-                    Email = model.Email,
-                    UserName = model.Username 
-                };
-
+                User user = _mapper.Map<User>(model);
+                
                 IdentityResult result = await _userManager.CreateAsync(user, model.Password);
                 return _identityHandler
                     .SetIdentityResult(result)
@@ -50,18 +49,12 @@ namespace BlogApplication.Controllers
         public async Task<IActionResult> Edit(string id)
         {
             User user = await _userManager.FindByIdAsync(id);
-
             if (user == null)
             {
                 return NotFound();
             }
 
-            EditUserViewModel model = new EditUserViewModel 
-            {
-                Id = user.Id, 
-                Email = user.Email, 
-                Username = user.UserName
-            };
+            EditUserViewModel model = _mapper.Map<EditUserViewModel>(user);
 
             return View(model);
         }
@@ -72,19 +65,17 @@ namespace BlogApplication.Controllers
             if (ModelState.IsValid)
             {
                 User user = await _userManager.FindByIdAsync(model.Id);
-                if (user != null)
-                {
-                    user.Email = model.Email;
-                    user.UserName = model.Username;
+                
+                user.Email = model.Email;
+                user.UserName = model.Username;
 
-                    IdentityResult result = await _userManager.UpdateAsync(user);
-                    return _identityHandler
-                        .SetIdentityResult(result)
-                        .SetSuccessAction(() => RedirectToAction(nameof(Index)))
-                        .SetFailureAction(() => View(model))
-                        .AddModelErrors(ModelState)
-                        .HandleIdentityResult();        
-                }
+                IdentityResult result = await _userManager.UpdateAsync(user);
+                return _identityHandler
+                    .SetIdentityResult(result)
+                    .SetSuccessAction(() => RedirectToAction(nameof(Index)))
+                    .SetFailureAction(() => View(model))
+                    .AddModelErrors(ModelState)
+                    .HandleIdentityResult();    
             }
 
             return View(model);
@@ -109,7 +100,9 @@ namespace BlogApplication.Controllers
             {
                 return NotFound();
             }
-            ChangePasswordViewModel model = new ChangePasswordViewModel { Id = user.Id, Email = user.Email };
+
+            ChangePasswordViewModel model = _mapper.Map<ChangePasswordViewModel>(user);
+
             return View(model);
         }
 
@@ -119,21 +112,14 @@ namespace BlogApplication.Controllers
             if (ModelState.IsValid)
             {
                 User user = await _userManager.FindByIdAsync(model.Id);
-
-                if (user != null)
-                {                    
-                    IdentityResult result = await _userManager.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
-                    return _identityHandler
-                        .SetIdentityResult(result)
-                        .SetSuccessAction(() => RedirectToAction(nameof(Index)))
-                        .SetFailureAction(() => View(model))
-                        .AddModelErrors(ModelState)
-                        .HandleIdentityResult();
-                }
-                else
-                {                    
-                    ModelState.AddModelError(string.Empty, "Пользователь не найден");
-                }
+                
+                IdentityResult result = await _userManager.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
+                return _identityHandler
+                    .SetIdentityResult(result)
+                    .SetSuccessAction(() => RedirectToAction(nameof(Index)))
+                    .SetFailureAction(() => View(model))
+                    .AddModelErrors(ModelState)
+                    .HandleIdentityResult();               
             }
             return View(model);
         }

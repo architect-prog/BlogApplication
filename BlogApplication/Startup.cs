@@ -40,7 +40,6 @@ namespace BlogApplication
                 }).AddEntityFrameworkStores<ApplicationContext>();
 
             services.AddAutoMapper(typeof(Startup));
-
             services.AddScoped<PostRepository>();
 
             services.AddTransient<UserService>();

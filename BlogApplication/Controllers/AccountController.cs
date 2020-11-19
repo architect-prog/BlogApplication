@@ -1,46 +1,33 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using AutoMapper;
+using System.Collections.Generic;
 using BlogApplication.Models;
-using BlogApplication.ViewModels;
 using BlogApplication.ViewModels.User;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Localization.Internal;
 
 namespace BlogApplication.Controllers
 {
     public class AccountController : Controller
     {
         private readonly UserManager<User> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
         private readonly SignInManager<User> _signInManager;
         private readonly IMapper _userMapper;
 
-        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, IMapper userMapper)
+        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, IMapper userMapper, RoleManager<IdentityRole> roleManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _userMapper = userMapper;
+            _roleManager = roleManager;
         }
-
-      
 
         public async Task<IActionResult> Details()
         {           
-            User user = await _userManager.GetUserAsync(User);
-            IList<string> userRoles = await _userManager.GetRolesAsync(user);
-
-            //UserDetailsViewModel userDetails = _userMapper.Map<UserDetailsViewModel>(user);
-
-            UserDetailsViewModel userDetails = new UserDetailsViewModel()
-            {
-                Email = user.Email,
-                UserName = user.UserName,
-                UserRoles = userRoles
-            };
-
+            User user = await _userManager.GetUserAsync(User);           
+            UserDetailsViewModel userDetails = _userMapper.Map<UserDetailsViewModel>(user);
+                      
             return View(userDetails);
         }
 
@@ -51,15 +38,14 @@ namespace BlogApplication.Controllers
         {
             if (ModelState.IsValid)
             {
-                User user = new User() 
-                {
-                    UserName = model.Username,
-                    Email = model.Email                   
-                };
-
+                User user = _userMapper.Map<User>(model);
                 IdentityResult result = await _userManager.CreateAsync(user, model.Password);
+                
                 if (result.Succeeded)
                 {
+                    List<string> startRoles = new List<string>() { "User" };
+                    await _userManager.AddToRolesAsync(user, startRoles);
+
                     await _signInManager.SignInAsync(user, false);
                     return RedirectToHome();
                 }

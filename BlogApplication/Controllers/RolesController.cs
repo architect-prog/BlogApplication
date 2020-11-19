@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using BlogApplication.Models;
 using BlogApplication.Services;
 using BlogApplication.ViewModels.Roles;
@@ -14,19 +15,21 @@ namespace BlogApplication.Controllers
     [Authorize(Roles = "Admin")]
     public class RolesController : Controller
     {
-        RoleManager<IdentityRole> _roleManager;
-        UserManager<User> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly UserManager<User> _userManager;
         private readonly IdentityResultHandler _identityHandler;
+        private readonly IMapper _mapper;
 
-        public RolesController(RoleManager<IdentityRole> roleManager, UserManager<User> userManager)
+        public RolesController(RoleManager<IdentityRole> roleManager, UserManager<User> userManager, IdentityResultHandler identityHandler, IMapper mapper)
         {
             _roleManager = roleManager;
             _userManager = userManager;
+            _identityHandler = identityHandler;
+            _mapper = mapper;
         }
 
         public IActionResult Index() => View(_roleManager.Roles.ToList());
         public IActionResult UserList() => View(_userManager.Users.ToList());
-
         public IActionResult Create() => View();
 
         [HttpPost]
@@ -57,7 +60,6 @@ namespace BlogApplication.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-
         public async Task<IActionResult> Edit(string userId)
         {
             User user = await _userManager.FindByIdAsync(userId);
@@ -66,36 +68,27 @@ namespace BlogApplication.Controllers
                 return NotFound();
             }
 
-            var userRoles = await _userManager.GetRolesAsync(user);
-            var allRoles = _roleManager.Roles.ToList();
+            IList<string> userRoles = await _userManager.GetRolesAsync(user);
+            List<IdentityRole> allRoles = _roleManager.Roles.ToList();
 
-            ChangeRoleViewModel model = new ChangeRoleViewModel
-            {
-                UserId = user.Id,
-                UserEmail = user.Email,
-                UserRoles = userRoles,
-                AllRoles = allRoles
-            };
+            ChangeRoleViewModel model = _mapper.Map<ChangeRoleViewModel>(user);
+            model.UserRoles = userRoles;
+            model.AllRoles = allRoles;        
 
             return View(model);
         }
+
         [HttpPost]
         public async Task<IActionResult> Edit(string userId, List<string> roles)
         {
-            User user = await _userManager.FindByIdAsync(userId);
-            if (user == null)
-            {
-                return NotFound();
-            }
+            User user = await _userManager.FindByIdAsync(userId);            
+            IList<string> userRoles = await _userManager.GetRolesAsync(user);
 
-            var userRoles = await _userManager.GetRolesAsync(user);
-
-            var allRoles = _roleManager.Roles.ToList();
-            var addedRoles = roles.Except(userRoles).ToList();
-            var removedRoles = userRoles.Except(roles).ToList();
+            List<IdentityRole> allRoles = _roleManager.Roles.ToList();
+            List<string> addedRoles = roles.Except(userRoles).ToList();
+            List<string> removedRoles = userRoles.Except(roles).ToList();
 
             await _userManager.AddToRolesAsync(user, addedRoles);
-
             await _userManager.RemoveFromRolesAsync(user, removedRoles);
 
             return RedirectToAction(nameof(UserList));
