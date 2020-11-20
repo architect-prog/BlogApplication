@@ -9,35 +9,41 @@
         <a class="btn btn-primary" asp-controller="Posts" asp-action="Create">Create New</a>
     }
 </p>
-<table class="table">
-    <thead class="thead-light">
-        <tr>
-            <th>Title</th>        
-            <th>PublishedDate</th>   
-            <th>Options</th>   
-        </tr>
-    </thead>
-    <tbody>
-    @foreach (var item in Model) 
+<div class="row">
+    @foreach (Post post in Model)
     {
-        <tr>
-            <td>@item.Title</td>
-            <td>@item.PublishedDate</td>
-            <td>
-                <form asp-action="Delete" asp-route-postId="@item.Id" method="post">
-                    <a class="btn btn-sm btn-secondary" asp-controller="Posts" asp-action="Details" asp-route-postId="@item.Id">Details</a>
-                    @if (ViewBag.IsAdmin == true || ViewBag.UserId == item.UserId)
-                    {
-                        <a class="btn btn-sm btn-secondary" asp-controller="Posts" asp-action="Edit" asp-route-postId="@item.Id">Edit</a>
-                        <button type="submit" class="btn btn-sm btn-danger">
-                            Delete
-                        </button>
-                    }
-                </form>               
-            </td>
-        </tr>
+        <div class="col-md-4">
+            <div class="card mb-4 shadow-sm">
+                @if (post.Images.Count > 0)
+                {
+                    <img class="card-img-top" width="225" height="225" src="data:image/jpeg;base64,@(Convert.ToBase64String(post.Images.First().ImageBytes))" />
+                }
+                else
+                {
+                    <svg class="bd-placeholder-img card-img-top" width="100%" height="225" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" focusable="false" role="img" aria-label="Placeholder: Thumbnail">
+                        <title>Placeholder</title>
+                        <rect width="100%" height="100%" fill="#55595c"></rect>
+                        <text x="50%" y="50%" fill="#eceeef" dy=".3em">Thumbnail</text>
+                    </svg>
+                }
+
+                <div class="card-body">
+                    <h3 class="card-title">@post.Title</h3>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <form asp-action="Delete" asp-route-postId="@post.Id" method="post">
+                            <a class="btn btn-sm btn-secondary" asp-controller="Posts" asp-action="Details" asp-route-postId="@post.Id">Details</a>
+                            @if (ViewBag.IsAdmin == true || ViewBag.UserId == post.UserId)
+                            {
+                                <a class="btn btn-sm btn-secondary" asp-controller="Posts" asp-action="Edit" asp-route-postId="@post.Id">Edit</a>
+                                <button type="submit" class="btn btn-sm btn-danger">
+                                    Delete
+                                </button>
+                            }
+                        </form>
+                        <small class="text-muted">@post.PublishedDate</small>
+                    </div>
+                </div>
+            </div>
+        </div>
     }
-
-
-    </tbody>
-</table>
+</div>

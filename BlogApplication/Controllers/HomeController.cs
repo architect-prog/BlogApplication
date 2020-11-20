@@ -26,20 +26,36 @@ namespace BlogApplication.Controllers
         public IActionResult Index()
         {
             List<Post> posts = _posts.GetAll();
-            Random random = new Random(DateTime.Now.Millisecond);
-
-            List<Post> result = new List<Post>();
-            for (int i = 0; i < 3; i++)
+            if (posts.Count == 0)
             {
-                result.Add(posts[random.Next(0, posts.Count)]);
+                return View();
             }
-
-            foreach (Post post in result)
+            else if(posts.Count < 3)
             {
-                post.Images = _images.GetAll().Where(x => x.PostId == post.Id).ToList();
-            }
 
-            return View(result);
+                foreach (Post post in posts)
+                {
+                    post.Images = _images.GetAll().Where(x => x.PostId == post.Id).ToList();
+                }
+                return View(posts);
+            }
+            else
+            {
+                Random random = new Random(DateTime.Now.Millisecond);
+
+                List<Post> result = new List<Post>();
+                for (int i = 0; i < 3; i++)
+                {
+                    result.Add(posts[random.Next(0, posts.Count)]);
+                }
+
+                foreach (Post post in result)
+                {
+                    post.Images = _images.GetAll().Where(x => x.PostId == post.Id).ToList();
+                }
+
+                return View(result);
+            }            
         }
      
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

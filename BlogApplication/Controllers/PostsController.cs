@@ -41,6 +41,11 @@ namespace BlogApplication.Controllers
         
             IEnumerable<Post> posts = _posts.GetAll();
 
+            foreach (Post post in posts)
+            {
+                post.Images = _images.GetAll().Where(x => x.PostId == post.Id).ToList();
+            }
+
             return View(posts);
         }
 
