@@ -40,6 +40,15 @@ namespace BlogApplication.Controllers
             return View(posts);
         }
 
+        public async Task<IActionResult> UserPosts()
+        {
+            User user = await _userManager.GetUserAsync(User);
+
+            IEnumerable<Post> userPosts = _posts.GetAll().Where(x => x.UserId == user.Id);
+
+            return View(userPosts);
+        }
+
         public IActionResult Create() => View();        
 
         [HttpPost]
@@ -53,20 +62,28 @@ namespace BlogApplication.Controllers
 
             await _posts.Add(post);        
             
-            return View();
+            return RedirectToAction(nameof(Index));
         }
 
         public async Task<IActionResult> Edit(int postId)
         {
             Post post = await _posts.GetById(postId);
-            
+
             if (post == null)
             {
                 return NotFound();
             }
 
-            EditPostViewModel model = _mapper.Map<EditPostViewModel>(post);             
-            return View(model);
+            User user = await _userManager.GetUserAsync(User);
+            if (user.Posts == null || user.Posts.Contains(post))
+            {
+                EditPostViewModel model = _mapper.Map<EditPostViewModel>(post);
+                return View(model);
+            }
+            else
+            {
+                return NotFound();
+            }          
         }
 
         [HttpPost]
@@ -87,9 +104,18 @@ namespace BlogApplication.Controllers
         [HttpPost]
         public async Task<IActionResult> Delete(int postId)
         {
-            await _posts.Delete(postId);            
+            Post post = await _posts.GetById(postId);
+            User user = await _userManager.GetUserAsync(User);
 
-            return RedirectToAction(nameof(Index));
+            if (user.Posts == null || user.Posts.Contains(post))
+            { 
+                await _posts.Delete(postId);
+                return RedirectToAction(nameof(Index));
+            }
+            else
+            {
+                return NotFound();
+            }
         }
 
         public async Task<IActionResult> Details(int postId)
