@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using BlogApplication.Models;
 using BlogApplication.Repository;
 using BlogApplication.ViewModels.Post;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,15 +16,17 @@ namespace BlogApplication.Controllers
     public class PostsController : Controller
     {
         private readonly PostRepository _posts;
+        private readonly ImageRepository _images;
         private readonly UserManager<User> _userManager;
 
         private readonly IMapper _mapper;
 
-        public PostsController(PostRepository posts, UserManager<User> userManager, IMapper mapper)
+        public PostsController(PostRepository posts, UserManager<User> userManager, IMapper mapper, ImageRepository images)
         {
             _posts = posts;
             _userManager = userManager;
             _mapper = mapper;
+            _images = images;
         }
 
         public async Task<IActionResult> Index()
@@ -58,10 +62,27 @@ namespace BlogApplication.Controllers
 
             Post post = _mapper.Map<Post>(model);
             post.UserId = user.Id;
-            post.PublishedDate = DateTime.UtcNow;          
+            post.PublishedDate = DateTime.UtcNow;
 
-            await _posts.Add(post);        
-            
+            post = await _posts.Add(post);
+
+            if (model.ImageCollection != null)
+            {
+                foreach (IFormFile image in model.ImageCollection)
+                {
+                    using (BinaryReader reader = new BinaryReader(image.OpenReadStream()))
+                    {
+                        byte[] imageBytes = reader.ReadBytes((int)image.Length);
+
+                        await _images.Add(new Image()
+                        {
+                            ImageBytes = imageBytes,
+                            PostId = post.Id
+                        });
+                    }
+                }
+            }       
+
             return RedirectToAction(nameof(Index));
         }
 
@@ -95,6 +116,29 @@ namespace BlogApplication.Controllers
                 post.Title = model.Title;
                 post.Content = model.Content;
 
+                List<Image> images = _images.GetAll().Where(x => x.PostId == post.Id).ToList();
+                foreach (Image image in images)
+                {
+                    await _images.Delete(image.Id);
+                }
+
+                if (model.ImageCollection != null)
+                {
+                    foreach (IFormFile image in model.ImageCollection)
+                    {
+                        using (BinaryReader reader = new BinaryReader(image.OpenReadStream()))
+                        {
+                            byte[] imageBytes = reader.ReadBytes((int)image.Length);
+
+                            await _images.Add(new Image()
+                            {
+                                ImageBytes = imageBytes,
+                                PostId = post.Id
+                            });
+                        }
+                    }
+                }
+
                 await _posts.Update(post);
                 return RedirectToAction(nameof(Index));                
             }
@@ -121,6 +165,8 @@ namespace BlogApplication.Controllers
         public async Task<IActionResult> Details(int postId)
         {
             Post post = await _posts.GetById(postId);
+            List<Image> images = _images.GetAll().Where(x => x.PostId == post.Id).ToList();
+            post.Images = images;
 
             PostDetailsViewModel model = _mapper.Map<PostDetailsViewModel>(post); 
 

@@ -13,7 +13,7 @@ namespace BlogApplication.Profiles
         public PostProfile()
         {
             CreateMap<CreatePostViewModel, Post>();
-
+               
             CreateMap<Post, EditPostViewModel>();
 
             CreateMap<Post, PostDetailsViewModel>();

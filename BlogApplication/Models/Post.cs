@@ -8,14 +8,15 @@ namespace BlogApplication.Models
 {
     public class Post
     {
-        public int Id { get; set; }
-        [Required]
-        public string Title { get; set; }
-        [Required]
+        public int Id { get; set; }       
+        public string Title { get; set; }       
         public string Content { get; set; }
         public DateTime PublishedDate { get; set; }
+        public DateTime UpdateDate { get; set; }
 
         public string UserId { get; set; }
         public User User { get; set; }
+
+        public List<Image> Images { get; set; }
     }
 }

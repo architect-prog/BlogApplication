@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BlogApplication.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,5 +11,6 @@ namespace BlogApplication.ViewModels.Post
         public string Title { get; set; }       
         public string Content { get; set; }
         public DateTime PublishedDate { get; set; }
+        public List<Image> Images { get; set; }
     }
 }

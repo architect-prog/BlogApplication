@@ -41,6 +41,7 @@ namespace BlogApplication
 
             services.AddAutoMapper(typeof(Startup));
             services.AddScoped<PostRepository>();
+            services.AddScoped<ImageRepository>();
 
             services.AddTransient<UserService>();
             services.AddTransient<IdentityResultHandler>();

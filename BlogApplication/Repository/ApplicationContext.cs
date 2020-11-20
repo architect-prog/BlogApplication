@@ -11,6 +11,7 @@ namespace BlogApplication.Repository
     public class ApplicationContext: IdentityDbContext<User>
     {
         public DbSet<Post> Posts { get; set; }
+        public DbSet<Image> Images { get; set; }
         public ApplicationContext(DbContextOptions<ApplicationContext> options)
             : base(options)
         {
