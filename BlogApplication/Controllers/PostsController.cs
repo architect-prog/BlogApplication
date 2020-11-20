@@ -96,7 +96,9 @@ namespace BlogApplication.Controllers
             }
 
             User user = await _userManager.GetUserAsync(User);
-            if (user.Posts == null || user.Posts.Contains(post))
+
+            IList<string> roles = await _userManager.GetRolesAsync(user);
+            if (post.UserId == user.Id || roles.Contains("Admin"))
             {
                 EditPostViewModel model = _mapper.Map<EditPostViewModel>(post);
                 return View(model);
@@ -149,9 +151,10 @@ namespace BlogApplication.Controllers
         public async Task<IActionResult> Delete(int postId)
         {
             Post post = await _posts.GetById(postId);
-            User user = await _userManager.GetUserAsync(User);
-
-            if (user.Posts == null || user.Posts.Contains(post))
+            User user = await _userManager.GetUserAsync(User);          
+            IList<string> roles = await _userManager.GetRolesAsync(user);
+           
+            if (post.UserId == user.Id || roles.Contains("Admin"))
             { 
                 await _posts.Delete(postId);
                 return RedirectToAction(nameof(Index));

@@ -43,7 +43,6 @@ namespace BlogApplication
             services.AddScoped<PostRepository>();
             services.AddScoped<ImageRepository>();
 
-            services.AddTransient<UserService>();
             services.AddTransient<IdentityResultHandler>();
 
             services.AddControllersWithViews();

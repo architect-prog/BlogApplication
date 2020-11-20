@@ -7,53 +7,33 @@
 <h1>UserPosts</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a class="btn btn-primary" asp-action="Create">Create New</a>
 </p>
 <table class="table">
-    <thead>
+    <thead class="thead-light">
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Id)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Title)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Content)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PublishedDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.UserId)
-            </th>
-            <th></th>
+            <th>Title</th>
+            <th>PublishedDate</th>
+            <th>Options</th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Id)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Title)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Content)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PublishedDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.UserId)
-            </td>
-            <td>
-                @Html.ActionLink("Edit", "Edit", new {  postId=item.Id  }) |
-                @Html.ActionLink("Details", "Details", new { postId = item.Id }) |
-                @Html.ActionLink("Delete", "Delete", new { postId = item.Id })
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Title</td>
+                <td>@item.PublishedDate</td>
+                <td>
+                    <form asp-action="Delete" asp-route-postId="@item.Id" method="post">
+                        <a class="btn btn-sm btn-secondary" asp-controller="Posts" asp-action="Details" asp-route-postId="@item.Id">Details</a>
+                        <a class="btn btn-sm btn-secondary" asp-controller="Posts" asp-action="Edit" asp-route-postId="@item.Id">Edit</a>
+                        <button type="submit" class="btn btn-sm btn-danger">
+                            Delete
+                        </button>
+                    </form>
+                </td>
+            </tr>
+
+        }
     </tbody>
 </table>

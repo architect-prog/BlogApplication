@@ -36,11 +36,11 @@
                     </ul>
                 </div>
                 @if (User.Identity.IsAuthenticated)
-                {                    
+                {
                     <div class="navbar-nav ml-md-auto">
                         <form asp-controller="Account" asp-action="SignOut" method="post">
                             <input class="btn btn-secondary mx-1" type="submit" value="Sign Out" />
-                        </form>                        
+                        </form>
                     </div>
                 }
                 else
@@ -64,9 +64,11 @@
             &copy; 2020 - BlogApplication - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script src="~/lib/jquery/dist/jquery.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
     @RenderSection("Scripts", required: false)
 </body>
 </html>
